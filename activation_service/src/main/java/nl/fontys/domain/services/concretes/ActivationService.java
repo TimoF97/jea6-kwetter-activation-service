@@ -1,8 +1,14 @@
-package nl.fontys.domain.services;
+package nl.fontys.domain.services.concretes;
 
 import nl.fontys.domain.models.ActivationEntry;
 import nl.fontys.domain.models.User;
+import nl.fontys.domain.services.interfaces.IActivationEntryService;
+import nl.fontys.domain.services.interfaces.IActivationService;
+import nl.fontys.domain.services.interfaces.IEmailService;
+import nl.fontys.domain.services.interfaces.IUserService;
 import nl.fontys.utils.MessageBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
 import java.util.Calendar;
@@ -12,7 +18,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ActivationService {
+@Service
+public class ActivationService implements IActivationService {
 
     private static final Logger LOGGER = Logger.getLogger(ActivationService.class.getName());
 
@@ -21,15 +28,16 @@ public class ActivationService {
     private static final String EMAIL_HOST = "smtp.gmail.com";
     private static final String WEBSITE_URL_PREFIX = "http://localhost:9090/activation/";
 
-    private ActivationEntryService activationEntryService;
-    private EmailService emailService;
-    private UserService userService;
+    @Autowired
+    private IActivationEntryService activationEntryService;
+    @Autowired
+    private IEmailService emailService;
+    @Autowired
+    private IUserService userService;
     private MessageBuilder messageBuilder;
 
     public ActivationService() {
-        this.activationEntryService = new ActivationEntryService();
-        this.emailService = new EmailService(EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_HOST).init();
-        this.userService = new UserService();
+//        this.emailService = emailService.init(EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_HOST);
         this.messageBuilder = new MessageBuilder();
     }
 
