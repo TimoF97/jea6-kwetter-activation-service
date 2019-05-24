@@ -5,8 +5,12 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EmailService {
+
+    private static final Logger LOGGER = Logger.getLogger(EmailService.class.getName());
 
     private static final boolean AUTH = true;
     private static final boolean TTLS = true;
@@ -16,13 +20,13 @@ public class EmailService {
     private static final String MAIL_SMTP_HOST_PROPERTY = "mail.smtp.host";
     private static final String MAIL_SMTP_PORT_PROPERTY = "mail.smtp.port";
 
-    private final String username;
+    private final String email;
     private final String password;
     private final Properties properties;
     private Session session;
 
-    public EmailService(final String username, final String password, final String host){
-        this.username = username;
+    public EmailService(final String email, final String password, final String host){
+        this.email = email;
         this.password = password;
 
         properties = new Properties();
@@ -35,7 +39,7 @@ public class EmailService {
     public EmailService init(){
         session = Session.getInstance(properties, new javax.mail.Authenticator() {
             protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new javax.mail.PasswordAuthentication(username, password);
+                return new javax.mail.PasswordAuthentication(email, password);
             }
         });
         return this;
@@ -45,7 +49,7 @@ public class EmailService {
         try {
             Transport.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "An exception was thrown in the MessageBuilder", e);
         }
     }
 

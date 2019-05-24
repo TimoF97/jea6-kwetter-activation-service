@@ -13,7 +13,11 @@ public class User {
     @Id
     private UUID id;
     private String emailAddress;
-    private boolean isActivated;
 
     protected User() { }
+
+    public User(final UUID id, final String emailAddress) {
+        this.id = id;
+        this.emailAddress = emailAddress;
+    }
 }
