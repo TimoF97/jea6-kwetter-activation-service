@@ -2,7 +2,7 @@ package nl.fontys.scheduling.jobs.concretes;
 
 import nl.fontys.domain.services.interfaces.IActivationService;
 import nl.fontys.scheduling.jobs.abstractions.SchedulableJob;
-import nl.fontys.utils.BeanUtils;
+import nl.fontys.utils.BeanFactory;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +16,7 @@ public class UserCleaningJob extends SchedulableJob {
     public UserCleaningJob() {
         super();
 
-        activationService = BeanUtils.getBean(IActivationService.class);
+        activationService = BeanFactory.getBean(IActivationService.class);
     }
 
     @Override
