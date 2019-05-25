@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class ActivationService implements IActivationService {
 
     private static final Logger LOGGER = Logger.getLogger(ActivationService.class.getName());
-    private static final String WEBSITE_URL_PREFIX = "http://localhost:9090/activation/";
+    private static final String WEBSITE_URL_PREFIX = "http://localhost:9090/api/v1/activation/";
 
     @Value("${mail-service.email.address}")
     private String emailAddress;
@@ -51,7 +51,19 @@ public class ActivationService implements IActivationService {
             public void onUserRegistration(final UUID userId, final String userEmailAddress) {
                 handleUserRegistration(userId, userEmailAddress);
             }
+
+            @Override
+            public void onActivationEntryVisit(final UUID entryId) {
+                handleActivationEntryVisit(entryId);
+            }
         };
+    }
+
+    private void deleteEntry(final ActivationEntry entry) {
+        LOGGER.log(Level.INFO, "[ActivationService] Locally deleting both the User and ActivationEntry correlated to: " + entry);
+
+        activationEntryService.deleteById(entry.getId());
+        userService.deleteById(entry.getUser().getId());
     }
 
     public void handleUserRegistration(final UUID userId, final String userEmailAddress) {
@@ -70,11 +82,6 @@ public class ActivationService implements IActivationService {
         emailService.sendEmail(message);
     }
 
-    private void deleteEntry(final ActivationEntry entry) {
-        activationEntryService.deleteById(entry.getId());
-        userService.deleteById(entry.getUser().getId());
-    }
-
     public void handleActivationEntryVisit(final UUID entryId) {
         final Optional<ActivationEntry> optionalEntry = activationEntryService.findById(entryId);
 
@@ -83,11 +90,8 @@ public class ActivationService implements IActivationService {
             return;
         }
 
+        apiGateway.sendUserActivatedNotice(optionalEntry.get().getUser().getId());
         deleteEntry(optionalEntry.get());
-
-        // TODO: Zorgen dat je pas kunt inloggen als je acc activated is
-        // TODO: in kwetter api isActivated by user toevoegen + onMEssage maken voor activated user
-        // TODO: kwetter api melden dat de user activated is zodat in api isActivated naar true gaat
     }
 
     public void deleteAllExpiredActivationEntries() {
@@ -101,7 +105,6 @@ public class ActivationService implements IActivationService {
             LOGGER.log(Level.INFO, "[ActivationService] Sending deletion request to API for User with Id: " + userId);
             apiGateway.sendUserDeletionRequest(entry.getUser().getId());
 
-            LOGGER.log(Level.INFO, "[ActivationService] Locally deleting both the User and ActivationEntry correlated to: " + entry);
             deleteEntry(entry);
         });
     }

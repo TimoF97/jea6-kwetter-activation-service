@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 public class ActivationEntry {
 
-    private static final int EXPIRATION_TIME_IN_MS = 120_000;
+    private static final int EXPIRATION_TIME_IN_MS = 160_000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
