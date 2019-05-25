@@ -1,6 +1,7 @@
 package nl.fontys.domain.services.concretes;
 
 import nl.fontys.domain.services.interfaces.IEmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
@@ -27,19 +28,24 @@ public class EmailService implements IEmailService {
     private Properties properties;
     private Session session;
 
-    public IEmailService init(final String email, final String password, final String host) {
+    public EmailService(@Value("${mail-service.email.address}") String emailAddress,
+                        @Value("${mail-service.password}") String emailPassword,
+                        @Value("${mail-service.host}") String emailHost) {
+        init(emailHost, emailAddress, emailPassword);
+    }
+
+    private void init(final String emailHost, final String emailAddress, final String emailPassword) {
         properties = new Properties();
         properties.put(MAIL_SMTP_AUTH_PROPERTY, AUTH);
         properties.put(MAIL_SMTP_TTLS_PROPERTY, TTLS);
-        properties.put(MAIL_SMTP_HOST_PROPERTY, host);
+        properties.put(MAIL_SMTP_HOST_PROPERTY, emailHost);
         properties.put(MAIL_SMTP_PORT_PROPERTY, PORT);
 
         session = Session.getInstance(properties, new javax.mail.Authenticator() {
             protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new javax.mail.PasswordAuthentication(email, password);
+                return new javax.mail.PasswordAuthentication(emailAddress, emailPassword);
             }
         });
-        return this;
     }
 
     public void sendEmail(final Message message) {

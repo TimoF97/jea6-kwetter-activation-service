@@ -8,6 +8,7 @@ import nl.fontys.domain.services.interfaces.IEmailService;
 import nl.fontys.domain.services.interfaces.IUserService;
 import nl.fontys.utils.MessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
@@ -22,11 +23,10 @@ import java.util.logging.Logger;
 public class ActivationService implements IActivationService {
 
     private static final Logger LOGGER = Logger.getLogger(ActivationService.class.getName());
-
-    private static final String EMAIL_ADDRESS = "kwettercasus@gmail.com";
-    private static final String EMAIL_PASSWORD = "fontysict";
-    private static final String EMAIL_HOST = "smtp.gmail.com";
     private static final String WEBSITE_URL_PREFIX = "http://localhost:9090/activation/";
+
+    @Value("${mail-service.email.address}")
+    private String emailAddress;
 
     @Autowired
     private IActivationEntryService activationEntryService;
@@ -37,20 +37,19 @@ public class ActivationService implements IActivationService {
     private MessageBuilder messageBuilder;
 
     public ActivationService() {
-//        this.emailService = emailService.init(EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_HOST);
         this.messageBuilder = new MessageBuilder();
     }
 
-    public void onUserRegistration(final UUID userId, final String emailAddress) {
-        final User user = new User(userId, emailAddress);
+    public void onUserRegistration(final UUID userId, final String userEmailAddress) {
+        final User user = new User(userId, userEmailAddress);
         final ActivationEntry activationEntry = new ActivationEntry(user);
 
         userService.save(user);
         activationEntryService.save(activationEntry);
 
         final Message message = messageBuilder.buildMessage(emailService.getSession(),
-                EMAIL_ADDRESS,
-                emailAddress,
+                this.emailAddress,
+                userEmailAddress,
                 "Kwetter account activation",
                 WEBSITE_URL_PREFIX + activationEntry.getId());
         emailService.sendEmail(message);

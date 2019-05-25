@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ActivationApplication {
 
     public static void main(final String[] args) {
-        // TODO: Job starten
         // TODO; Messaging init
         // TODO: ActivationService aanroepen
         SpringApplication.run(ActivationApplication.class, args);
