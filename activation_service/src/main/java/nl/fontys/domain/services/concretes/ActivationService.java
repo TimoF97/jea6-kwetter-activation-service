@@ -6,6 +6,7 @@ import nl.fontys.domain.services.interfaces.IActivationEntryService;
 import nl.fontys.domain.services.interfaces.IActivationService;
 import nl.fontys.domain.services.interfaces.IEmailService;
 import nl.fontys.domain.services.interfaces.IUserService;
+import nl.fontys.messaging.gateways.APIGateway;
 import nl.fontys.utils.MessageBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,9 +36,22 @@ public class ActivationService implements IActivationService {
     @Autowired
     private IUserService userService;
     private MessageBuilder messageBuilder;
+    private APIGateway apiGateway;
 
     public ActivationService() {
-        this.messageBuilder = new MessageBuilder();
+        messageBuilder = new MessageBuilder();
+
+        initGateway();
+    }
+
+    private void initGateway() {
+        apiGateway = new APIGateway() {
+
+            @Override
+            public void onUserRegistration(final UUID userId, final String userEmailAddress) {
+                handleUserRegistration(userId, userEmailAddress);
+            }
+        };
     }
 
     public void handleUserRegistration(final UUID userId, final String userEmailAddress) {
@@ -52,7 +66,13 @@ public class ActivationService implements IActivationService {
                 userEmailAddress,
                 "Kwetter account activation",
                 WEBSITE_URL_PREFIX + activationEntry.getId());
+
         emailService.sendEmail(message);
+    }
+
+    private void deleteEntry(final ActivationEntry entry) {
+        activationEntryService.deleteById(entry.getId());
+        userService.deleteById(entry.getUser().getId());
     }
 
     public void handleActivationEntryVisit(final UUID entryId) {
@@ -65,11 +85,9 @@ public class ActivationService implements IActivationService {
 
         deleteEntry(optionalEntry.get());
 
+        // TODO: in kwetter api isActivated by user toevoegen + onMEssage maken voor activated user
         // TODO: kwetter api melden dat de user activated is zodat in api isActivated naar true gaat
     }
-
-    // TODO: messaging met gateway
-    // TODO: in kwetter api isActivated by user toevoegen + onMEssage maken voor activated user
 
     public void deleteAllExpiredActivationEntries() {
         final Date currentDateTime = Calendar.getInstance().getTime();
@@ -81,10 +99,5 @@ public class ActivationService implements IActivationService {
 
             // TODO: via messaging kwetter api user laten deleten
         });
-    }
-
-    private void deleteEntry(final ActivationEntry entry) {
-        activationEntryService.deleteById(entry.getId());
-        userService.deleteById(entry.getUser().getId());
     }
 }
