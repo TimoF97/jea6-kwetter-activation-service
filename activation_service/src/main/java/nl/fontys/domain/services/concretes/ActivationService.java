@@ -40,7 +40,7 @@ public class ActivationService implements IActivationService {
         this.messageBuilder = new MessageBuilder();
     }
 
-    public void onUserRegistration(final UUID userId, final String userEmailAddress) {
+    public void handleUserRegistration(final UUID userId, final String userEmailAddress) {
         final User user = new User(userId, userEmailAddress);
         final ActivationEntry activationEntry = new ActivationEntry(user);
 
@@ -55,7 +55,7 @@ public class ActivationService implements IActivationService {
         emailService.sendEmail(message);
     }
 
-    public void onActivationEntryVisit(final UUID entryId) {
+    public void handleActivationEntryVisit(final UUID entryId) {
         final Optional<ActivationEntry> optionalEntry = activationEntryService.findById(entryId);
 
         if (!optionalEntry.isPresent()) {

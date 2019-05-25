@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface IActivationService {
 
-    void onUserRegistration(final UUID userId, final String emailAddress);
-    void onActivationEntryVisit(final UUID entryId);
+    void handleUserRegistration(final UUID userId, final String emailAddress);
+    void handleActivationEntryVisit(final UUID entryId);
     void deleteAllExpiredActivationEntries();
 }
