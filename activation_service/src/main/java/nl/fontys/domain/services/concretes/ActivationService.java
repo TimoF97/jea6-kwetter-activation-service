@@ -79,12 +79,13 @@ public class ActivationService implements IActivationService {
         final Optional<ActivationEntry> optionalEntry = activationEntryService.findById(entryId);
 
         if (!optionalEntry.isPresent()) {
-            LOGGER.log(Level.WARNING, "[ActivationEntryService] No ActivationEntry exists for the given entryId.");
+            LOGGER.log(Level.WARNING, "[ActivationService] No ActivationEntry exists for the given entryId.");
             return;
         }
 
         deleteEntry(optionalEntry.get());
 
+        // TODO: Zorgen dat je pas kunt inloggen als je acc activated is
         // TODO: in kwetter api isActivated by user toevoegen + onMEssage maken voor activated user
         // TODO: kwetter api melden dat de user activated is zodat in api isActivated naar true gaat
     }
@@ -95,9 +96,13 @@ public class ActivationService implements IActivationService {
                 .findAllByExpirationDateIsBefore(currentDateTime);
 
         entries.forEach(entry -> {
-            deleteEntry(entry);
+            final UUID userId = entry.getUser().getId();
 
-            // TODO: via messaging kwetter api user laten deleten
+            LOGGER.log(Level.INFO, "[ActivationService] Sending deletion request to API for User with Id: " + userId);
+            apiGateway.sendUserDeletionRequest(entry.getUser().getId());
+
+            LOGGER.log(Level.INFO, "[ActivationService] Locally deleting both the User and ActivationEntry correlated to: " + entry);
+            deleteEntry(entry);
         });
     }
 }

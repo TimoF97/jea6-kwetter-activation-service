@@ -11,6 +11,8 @@ import java.util.UUID;
 @Data
 public class ActivationEntry {
 
+    private static final int EXPIRATION_TIME_IN_MS = 120_000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -26,6 +28,6 @@ public class ActivationEntry {
         this.user = user;
 
         expirationDate = Calendar.getInstance().getTime();
-        expirationDate.setTime(expirationDate.getTime() + 300_000);
+        expirationDate.setTime(expirationDate.getTime() + EXPIRATION_TIME_IN_MS);
     }
 }
